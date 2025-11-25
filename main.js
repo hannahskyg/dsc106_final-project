@@ -131,44 +131,22 @@ function renderBySex() {
 }
 
 
-// ------- LEGEND -------
-const legend = svg.append("g")
-  .attr("transform", `translate(${width - 150}, 50)`);
-
-const items = [
-  { name: "Male", color: "#4a90e2" },
-  { name: "Female", color: "#e94e77" }
-];
-
-legend.selectAll("legend-dots")
-  .data(items)
-  .enter()
-  .append("rect")
-  .attr("x", 0)
-  .attr("y", (d, i) => i * 20)
-  .attr("width", 12)
-  .attr("height", 12)
-  .attr("fill", d => d.color);
-
-legend.selectAll("legend-labels")
-  .data(items)
-  .enter()
-  .append("text")
-  .attr("x", 20)
-  .attr("y", (d, i) => i * 20 + 10)
-  .text(d => d.name)
-  .style("font-size", "12px")
-  .attr("alignment-baseline", "middle");
 
 
 // ---------------- TOGGLE LOGIC ----------------
 document.getElementById("sexToggle").addEventListener("change", function () {
-  if (this.checked) {
-    renderBySex();
-  } else {
-    renderOverall();
-  }
+
+    const legend = document.getElementById("legend");
+
+    if (this.checked) {
+        renderBySex();
+        legend.style.display = "flex";   // show legend
+    } else {
+        renderOverall();
+        legend.style.display = "none";   // hide legend
+    }
 });
+
 
 // Initial load
 renderOverall();

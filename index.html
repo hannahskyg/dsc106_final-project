@@ -4,28 +4,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Final Project</title>
+
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-    <h1> US Households' Financial Situation Pre- and Post-COVID Across Different Demographics
-</h1>
-    <h2> DSC106 Final Project</h2>
-    <p> By: Hannah Gonzalez (hagonzalez@ucsd.edu), Edwards Tong (edtong@ucsd.edu), Janie Chan (jlc006@ucsd.edu), and Junran Yang (juy029@ucsd.edu
-    )</p>
 
-    <div style="max-width:700px;margin:auto;">
-  <h2>U.S. Household Net Worth Comparison</h2>
+    <h1>US Households' Financial Situation Pre- and Post-COVID Across Different Demographics</h1>
+    <h2>DSC106 Final Project</h2>
 
-  <label>
-    <input type="checkbox" id="sexToggle">
-    Filter by sex of household head (HHSEX)
-  </label>
+    <p>
+        By: Hannah Gonzalez (hagonzalez@ucsd.edu), Edwards Tong (edtong@ucsd.edu),
+        Janie Chan (jlc006@ucsd.edu), and Junran Yang (juy029@ucsd.edu)
+    </p>
 
-  <svg id="chart" width="700" height="450"></svg>
-</div>
+    <div id="chart-container">
+
+        <h2>U.S. Household Net Worth Comparison</h2>
+
+        <div class="toggle-wrapper">
+            <label>
+                <input type="checkbox" id="sexToggle">
+                Filter by sex of household head (HHSEX)
+            </label>
+        </div>
+
+        <!-- Legend (hidden by default) -->
+        <div class="legend-container" id="legend" style="display:none;">
+            <div class="legend-item">
+                <div class="legend-color" style="background:#4a90e2;"></div>
+                <span>Male</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background:#e94e77;"></div>
+                <span>Female</span>
+            </div>
+        </div>
+
+        <svg id="chart" width="700" height="450"></svg>
+    </div>
+
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script type="module" src="main.js"></script>
-
-
 
 </body>
 </html>

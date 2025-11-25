@@ -1,0 +1,110 @@
+/* ------------ GLOBAL PAGE STYLING ------------ */
+
+body {
+    font-family: "Inter", "Helvetica", Arial, sans-serif;
+    margin: 0;
+    padding: 30px;
+    background: linear-gradient(145deg, #fafbff, #eef2ff);
+    color: #222;
+}
+
+/* Big Title */
+h1 {
+    text-align: center;
+    font-size: 36px;
+    margin-bottom: 5px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #2a2a2a;
+}
+
+/* Subtitle */
+h2 {
+    text-align: center;
+    font-size: 22px;
+    margin-top: 5px;
+    font-weight: 600;
+}
+
+p {
+    text-align: center;
+    font-size: 15px;
+    max-width: 900px;
+    margin: 0 auto 25px auto;
+    color: #444;
+}
+
+
+/* ----------- MAIN CHART CONTAINER ----------- */
+
+#chart-container {
+    max-width: 850px;
+    margin: auto;
+    background: white;
+    padding: 30px 35px 50px 35px;
+    border-radius: 22px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    transition: 0.3s ease;
+}
+
+/* Subtle hover glow */
+#chart-container:hover {
+    box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+}
+
+
+/* ----------- TOGGLE ----------- */
+
+.toggle-wrapper {
+    text-align: center;
+    margin-bottom: 15px;
+    font-size: 16px;
+}
+
+#sexToggle {
+    accent-color: #6f8cff; /* Cuter checkbox color */
+}
+
+
+/* ----------- LEGEND ----------- */
+
+.legend-container {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    margin-bottom: 15px;
+    margin-top: 5px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+}
+
+.legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+}
+
+
+/* ----------- SVG STYLING ----------- */
+
+#chart {
+    display: block;
+    margin: auto;
+}
+
+/* Axis text softer and cuter */
+text {
+    font-size: 12px;
+    fill: #555;
+}
+
+/* Make bars slightly rounded at top */
+rect {
+    rx: 4;
+    ry: 4;
+}
