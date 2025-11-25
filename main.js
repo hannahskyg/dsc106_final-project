@@ -1,3 +1,6 @@
+import * as d3 from "d3";
+
+
 const data2019 = await d3.csv("2019.csv");
 const data2022 = await d3.csv("2022.csv");
 
@@ -146,3 +149,4 @@ document.getElementById("sexToggle").addEventListener("change", function () {
 
 // Initial load
 renderOverall();
+
