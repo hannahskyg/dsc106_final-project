@@ -64,18 +64,18 @@ svg.append("text")
 
 // Overall (default)
 function renderOverall() {
+  // Remove grouped bars from sex filter
+  g.selectAll(".year-group").remove();
+
   const data = overallData;
 
   x0.domain(data.map(d => d.year));
   y.domain([0, d3.max(data, d => d.networth)]);
 
-  // JOIN
   const bars = g.selectAll(".bar").data(data, d => d.year);
 
-  // EXIT
   bars.exit().remove();
 
-  // UPDATE + ENTER
   bars.enter()
     .append("rect")
     .attr("class", "bar")
@@ -88,13 +88,18 @@ function renderOverall() {
     .attr("height", d => chartHeight - y(d.networth))
     .attr("fill", "#4a90e2");
 
-  // Axes
-  xAxisGroup.call(d3.axisBottom(x0).tickFormat(d => d));
+  xAxisGroup.call(d3.axisBottom(x0));
   yAxisGroup.call(d3.axisLeft(y));
 }
 
 // Grouped by HHSEX
 function renderBySex() {
+  // Remove the 2 blue bars from overall
+  g.selectAll(".bar").remove();
+
+  // Remove old grouped bars if toggled multiple times
+  g.selectAll(".year-group").remove();
+
   const data = sexData;
 
   const years = [...new Set(data.map(d => d.year))];
@@ -102,30 +107,19 @@ function renderBySex() {
 
   x0.domain(years);
   x1.domain(sexes).range([0, x0.bandwidth()]);
-
   y.domain([0, d3.max(data, d => d.networth)]);
 
-  // JOIN
   const groups = g.selectAll(".year-group")
-    .data(years);
-
-  groups.enter()
+    .data(years)
+    .enter()
     .append("g")
     .attr("class", "year-group")
-    .merge(groups)
     .attr("transform", year => `translate(${x0(year)}, 0)`);
 
-  const bars = g.selectAll(".year-group")
-    .selectAll("rect")
-    .data(year => data.filter(d => d.year === year));
-
-  bars.exit().remove();
-
-  bars.enter()
+  groups.selectAll("rect")
+    .data(year => data.filter(d => d.year === year))
+    .enter()
     .append("rect")
-    .merge(bars)
-    .transition()
-    .duration(600)
     .attr("x", d => x1(d.sex))
     .attr("width", x1.bandwidth())
     .attr("y", d => y(d.networth))
@@ -135,6 +129,37 @@ function renderBySex() {
   xAxisGroup.call(d3.axisBottom(x0));
   yAxisGroup.call(d3.axisLeft(y));
 }
+
+
+// ------- LEGEND -------
+const legend = svg.append("g")
+  .attr("transform", `translate(${width - 150}, 50)`);
+
+const items = [
+  { name: "Male", color: "#4a90e2" },
+  { name: "Female", color: "#e94e77" }
+];
+
+legend.selectAll("legend-dots")
+  .data(items)
+  .enter()
+  .append("rect")
+  .attr("x", 0)
+  .attr("y", (d, i) => i * 20)
+  .attr("width", 12)
+  .attr("height", 12)
+  .attr("fill", d => d.color);
+
+legend.selectAll("legend-labels")
+  .data(items)
+  .enter()
+  .append("text")
+  .attr("x", 20)
+  .attr("y", (d, i) => i * 20 + 10)
+  .text(d => d.name)
+  .style("font-size", "12px")
+  .attr("alignment-baseline", "middle");
+
 
 // ---------------- TOGGLE LOGIC ----------------
 document.getElementById("sexToggle").addEventListener("change", function () {
