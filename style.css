@@ -1,110 +1,183 @@
 /* ------------ GLOBAL PAGE STYLING ------------ */
+  * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-body {
-    font-family: "Inter", "Helvetica", Arial, sans-serif;
-    margin: 0;
-    padding: 30px;
-    background: linear-gradient(145deg, #fafbff, #eef2ff);
-    color: #222;
-}
+        body {
+            font-family: "Inter", "Helvetica", Arial, sans-serif;
+            background: linear-gradient(145deg, #fafbff, #eef2ff);
+            color: #222;
+        }
 
-/* Big Title */
-h1 {
-    text-align: center;
-    font-size: 36px;
-    margin-bottom: 5px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    color: #2a2a2a;
-}
+        /* ------------ HEADER ------------ */
+        .header {
+            text-align: center;
+            padding: 60px 30px;
+            background: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
 
-/* Subtitle */
-h2 {
-    text-align: center;
-    font-size: 22px;
-    margin-top: 5px;
-    font-weight: 600;
-}
+        .header h1 {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #2a2a2a;
+        }
 
-p {
-    text-align: center;
-    font-size: 15px;
-    max-width: 900px;
-    margin: 0 auto 25px auto;
-    color: #444;
-}
+        .header h2 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #555;
+        }
 
+        .header p {
+            font-size: 16px;
+            color: #666;
+            max-width: 800px;
+            margin: 0 auto;
+        }
 
-/* ----------- MAIN CHART CONTAINER ----------- */
+        /* ------------ SCROLLYTELLING CONTAINER ------------ */
+        #scroll-container {
+            position: relative;
+            display: flex;
+            min-height: 400vh;
+        }
 
-#chart-container {
-    max-width: 850px;
-    margin: auto;
-    background: white;
-    padding: 30px 35px 50px 35px;
-    border-radius: 22px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-    transition: 0.3s ease;
-}
+        /* Text sections - left side */
+        .scroll-text {
+            width: 45%;
+            padding: 40px;
+        }
 
-/* Subtle hover glow */
-#chart-container:hover {
-    box-shadow: 0 10px 25px rgba(0,0,0,0.12);
-}
+        .step {
+            min-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 40px;
+            background: white;
+            margin-bottom: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            opacity: 0.3;
+            transition: opacity 0.4s ease;
+        }
 
+        .step.active {
+            opacity: 1;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
 
-/* ----------- TOGGLE ----------- */
+        .step h3 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: #2a2a2a;
+        }
 
-.toggle-wrapper {
-    text-align: center;
-    margin-bottom: 15px;
-    font-size: 16px;
-}
+        .step p {
+            font-size: 18px;
+            line-height: 1.7;
+            color: #444;
+            text-align: left;
+        }
 
-#sexToggle {
-    accent-color: #6f8cff; /* Cuter checkbox color */
-}
+        /* Chart container - sticky right side */
+        .chart-container {
+            position: sticky;
+            top: 80px;
+            width: 55%;
+            height: 600px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
 
+        #chart {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+            padding: 20px;
+        }
 
-/* ----------- LEGEND ----------- */
+        /* Legend */
+        .legend-container {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
 
-.legend-container {
-    display: flex;
-    justify-content: center;
-    gap: 25px;
-    margin-bottom: 15px;
-    margin-top: 5px;
-}
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
 
-.legend-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 15px;
-}
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
 
-.legend-color {
-    width: 16px;
-    height: 16px;
-    border-radius: 4px;
-}
+        /* Axis styling */
+        .axis text {
+            font-size: 12px;
+            fill: #555;
+        }
 
+        .axis line, .axis path {
+            stroke: #ccc;
+        }
 
-/* ----------- SVG STYLING ----------- */
+        rect {
+            rx: 4;
+            ry: 4;
+        }
 
-#chart {
-    display: block;
-    margin: auto;
-}
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 60px 30px;
+            background: white;
+            margin-top: 50px;
+        }
 
-/* Axis text softer and cuter */
-text {
-    font-size: 12px;
-    fill: #555;
-}
+        .footer h2 {
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
 
-/* Make bars slightly rounded at top */
-rect {
-    rx: 4;
-    ry: 4;
-}
+        .footer p {
+            font-size: 16px;
+            max-width: 800px;
+            margin: 15px auto;
+            color: #555;
+            text-align: left;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 968px) {
+            #scroll-container {
+                flex-direction: column;
+            }
+            
+            .scroll-text, .chart-container {
+                width: 100%;
+            }
+            
+            .chart-container {
+                position: relative;
+                top: 0;
+            }
+        }

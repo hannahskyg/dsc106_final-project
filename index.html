@@ -9,50 +9,63 @@
 </head>
 
 <body>
-
-    <h1>US Households' Financial Situation Pre- and Post-COVID Across Different Demographics</h1>
-    <h2>DSC106 Final Project</h2>
-
-    <p>
-        By: Hannah Gonzalez (hagonzalez@ucsd.edu), Edwards Tong (edtong@ucsd.edu),
-        Janie Chan (jlc006@ucsd.edu), and Junran Yang (juy029@ucsd.edu)
-    </p>
-
-    <div id="chart-container">
-
-        <h2>U.S. Household Net Worth Comparison</h2>
-
-        <div class="toggle-wrapper">
-            <label>
-                <input type="checkbox" id="sexToggle">
-                Filter by sex of household head (HHSEX)
-            </label>
-        </div>
-
-        <!-- Legend (hidden by default) -->
-        <div class="legend-container" id="legend" style="display:none;">
-            <div class="legend-item">
-                <div class="legend-color" style="background:#4a90e2;"></div>
-                <span>Male</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background:#e94e77;"></div>
-                <span>Female</span>
-            </div>
-        </div>
-
-        <svg id="chart" width="700" height="450"></svg>
+ <!-- Header -->
+    <div class="header">
+        <h1>US Households' Financial Situation</h1>
+        <h2>Pre- and Post-COVID Across Different Demographics</h2>
+        <p>By: Hannah Gonzalez, Edwards Tong, Janie Chan, and Junran Yang</p>
     </div>
-    <div>
-        <br><h2>Write up:</h2>
+
+    <!-- Scrollytelling Section -->
+    <div id="scroll-container">
+        <!-- Text Steps -->
+        <div class="scroll-text">
+            <div class="step" data-step="0">
+                <h3>And... Wealth is Growing</h3>
+                <p>Between 2019 and 2022, the average American household saw their net worth increase. The overall mean household net worth rose from around $750,000 to over $1 million—a significant jump of nearly 40%.</p>
+                <p>This period included the COVID-19 pandemic, stimulus payments, and a booming stock and housing market.</p>
+            </div>
+
+            <div class="step" data-step="1">
+                <h3>But... Not Everyone Benefits Equally</h3>
+                <p>When we break down the data by the sex of the household head, we see disparities. Male-headed households consistently show higher average net worth than female-headed households in both years.</p>
+                <p>While both groups experienced growth, the gap between them remains substantial.</p>
+            </div>
+
+            <div class="step" data-step="2">
+                <h3>Age Tells a Different Story</h3>
+                <p>Looking at age groups reveals an even more complex picture. Middle-aged households (ages 45-64) hold significantly more wealth than younger or older households.</p>
+                <p>Young households (under 35) have dramatically lower net worth, while older households (65+) show moderate levels—likely reflecting retirement asset drawdowns.</p>
+            </div>
+
+            <div class="step" data-step="3">
+                <h3>Education: The Great Divider</h3>
+                <p>Perhaps the starkest contrast appears when examining education levels. Households headed by someone with a college degree have net worth several times higher than those without.</p>
+                <p>This education gap widened between 2019 and 2022, suggesting that recent economic gains disproportionately benefited the more educated.</p>
+            </div>
+
+            <div class="step" data-step="4">
+                <h3>Therefore... Inequality Persists</h3>
+                <p>While the overall picture shows growth, the benefits of economic expansion are unevenly distributed across demographics. Gender, age, and especially education create significant wealth divides.</p>
+                <p>Understanding these patterns is crucial for addressing financial inequality in America.</p>
+            </div>
+        </div>
+
+        <!-- Sticky Chart -->
+        <div class="chart-container">
+            <svg id="chart" width="600" height="500"></svg>
+            <div class="legend-container" id="legend" style="display:none;"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <h2>Project Details</h2>
         <p><b>What have you done so far?</b></p>
-        <p>
-            At the moment, we have created and published our GitHub page with our first interactive visualization. We have integrated our first interactive visualization by using d3 to import two datasets from 2019 and 2022 and create a chart that compares the mean U.S. Household net worth between the two years. To make it interactive and more detailed for getting started with the scrollytelling, we implemented a filter checkbox that changes the bar chart to visualize based on the sex of the household head. We also have some simple styling/CSS down to get started with making the website more appealing to the audience. 
-        </p>
-        <br><p><b>What will be the most challenging part of the project to design and why?</b></p>
-        <p>
-            The most challenging part of the project design would be figuring out how to integrate scrollytelling. We like the idea of using scrollytelling to visualize our dataset, but this is something that we just learned and are not familiar with yet. In addition, we don’t have a super clear narrative/story to tell since we want to compare with all the demographics and need to figure out how to transition between them all. The best way to transition between them would be the animation supporting the scrolling, which we also just learned, and would be challenging.
-        </p>
+        <p>We've implemented a scrollytelling narrative that guides viewers through the "and, but, therefore" story of household net worth changes. The visualization transitions between overall trends, sex-based comparisons, age groups, and education levels as you scroll.</p>
+        
+        <p><b>What was challenging?</b></p>
+        <p>Integrating smooth scrollytelling transitions with D3.js visualizations required careful coordination between scroll position detection and chart updates. Creating meaningful groupings for age and education data while maintaining clear narratives was also complex.</p>
     </div>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script type="module" src="main.js"></script>
