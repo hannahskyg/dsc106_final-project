@@ -21,6 +21,8 @@ function adjustForInflation(nominal, year) {
 const data2019 = await d3.csv("data/2019.csv");
 const data2022 = await d3.csv("data/2022.csv");
 
+console.log("Data loaded:", data2019.length, data2022.length); // Debug
+
 // ===========================================
 // GROUP HELPERS
 // ===========================================
@@ -167,7 +169,7 @@ function clearChart() {
     g.selectAll("rect").remove();
     g.selectAll(".year-group").remove();
     g.selectAll(".value-label").remove();
-    g.selectAll(".zero-line").remove();   // <-- FIX: remove baseline line
+    g.selectAll(".zero-line").remove();
     legend.html("").style("display", "none");
 }
 
@@ -524,7 +526,7 @@ window.addEventListener("scroll", checkScroll);
 window.addEventListener("resize", checkScroll);
 
 // ===========================================
-// TEXT TOGGLE HANDLING
+// TEXT TOGGLE HANDLING - FIXED!
 // ===========================================
 function updateTextVisibility() {
     const isNominal = window.mode === "nominal";
@@ -537,14 +539,32 @@ function updateTextVisibility() {
     });
 }
 
-// Listen for toggle
-document.querySelectorAll("input[name='mode']").forEach(input => {
-    input.addEventListener("change", () => {
-        window.mode = input.value;
-        updateChart(currentStep);
-        updateTextVisibility();
+// CRITICAL FIX: Wait for DOM to be ready, then attach listeners
+function initToggle() {
+    console.log("Initializing toggle listeners..."); // Debug
+    
+    const radioButtons = document.querySelectorAll("input[name='mode']");
+    console.log("Found radio buttons:", radioButtons.length); // Debug
+    
+    radioButtons.forEach(input => {
+        input.addEventListener("change", (e) => {
+            console.log("Mode changed to:", e.target.value); // Debug
+            window.mode = e.target.value;
+            
+            // Force re-render of current step
+            if (currentStep === 0) renderOverall();
+            else if (currentStep === 1) renderBySex();
+            else if (currentStep === 2) renderByAge();
+            else if (currentStep === 3) renderByEducation();
+            else if (currentStep === 4) renderFinalComparison();
+            
+            updateTextVisibility();
+        });
     });
-});
+}
+
+// Call init function to set up listeners
+initToggle();
 
 // Initial load
 renderOverall();
