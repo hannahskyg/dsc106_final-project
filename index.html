@@ -9,55 +9,110 @@
 </head>
 
 <body>
- <!-- Header -->
-    <div class="header">
-        <h1>Did people get richer after COVID!?</h1>
-        <h2>US Households' Financial Situation Pre- and Post-COVID Across Different Demographics</h2>
-        <p>By: Hannah Gonzalez, Edwards Tong, Janie Chan, and Junran Yang</p>
+
+<!-- Header -->
+<div class="header">
+    <h1>Did people get richer after COVID!?</h1>
+    <h2>US Households' Financial Situation Pre- and Post-COVID Across Different Demographics</h2>
+    <p>By: Hannah Gonzalez, Edwards Tong, Janie Chan, and Junran Yang</p>
+
+    <!-- NEW: Mode Toggle -->
+    <div id="mode-toggle">
+        <label><input type="radio" name="mode" value="nominal" checked> Nominal</label>
+        <label><input type="radio" name="mode" value="real"> Real (Inflation-adjusted)</label>
     </div>
+</div>
 
-    <!-- Scrollytelling Section -->
-    <div id="scroll-container">
-        <!-- Text Steps -->
-        <div class="scroll-text">
-            <div class="step" data-step="0">
-                <h3>Wealth is Growing..  or is it?</h3>
-                <p>Between 2019 and 2022, the average American household saw their net worth increase. The overall mean household net worth increased significantly.</p>
-            </div>
+<!-- Scrollytelling Section -->
+<div id="scroll-container">
 
-            <div class="step" data-step="1">
-                <h3>But... Not Everyone Benefits Equally</h3>
-                <p>When we break down the data by the sex of the household head, we see disparities. Looking at the change, female households have a smaller change in networth than males households.</p>
-            </div>
+    <!-- Text Steps -->
+    <div class="scroll-text">
 
-            <div class="step" data-step="2">
-                <h3>Age Tells a Different Story</h3>
-                <p>Looking at age groups reveals an even more complex picture. Middle-aged households (ages 45-64) hold significantly more wealth than younger or older households.</p>
-                <p>Young households (under 35) have dramatically lower net worth, while older households (65+) show moderate levels—likely reflecting retirement asset drawdowns.</p>
-            </div>
+        <!-- STEP 0 -->
+        <div class="step" data-step="0">
+            <h3>Wealth is Growing… or is it?</h3>
 
-            <div class="step" data-step="3">
-                <h3>Education, the Problem</h3>
-                <p>When examining education levels, households headed by someone with someone of a high school degree or less had less networth.</p>
-            </div>
+            <!-- NOMINAL -->
+            <p class="nominal-text">
+                Between 2019 and 2022, the average American household saw their net worth increase significantly in nominal terms.
+            </p>
 
-            <div class="step" data-step="4">
-                <h3>Therefore... Inequality Persists</h3>
-                <p>While the overall picture shows growth, the benefits of economic expansion are unevenly distributed across demographics. Gender, age, and education create significant wealth divides.</p>
-                <p>Understanding these patterns is crucial for addressing financial inequality in America.</p>
-            </div>
+            <!-- REAL -->
+            <p class="real-text">
+                Although nominal net worth increased between 2019 and 2022, inflation eroded much of the gain.
+                In real terms (inflation-adjusted), wealth grew far less — suggesting households did not become as wealthy
+                as it appears.
+            </p>
         </div>
 
-        <!-- Sticky Chart -->
-        <div class="chart-container">
-            <svg id="chart" width="600" height="500"></svg>
-            <div class="legend-container" id="legend" style="display:none;"></div>
+        <!-- STEP 1 -->
+        <div class="step" data-step="1">
+            <h3>But... Not Everyone Benefits Equally</h3>
+
+            <p class="nominal-text">
+                Breaking down the data by sex reveals disparities. Female-headed households experienced a smaller nominal increase in net worth than male-headed households.
+            </p>
+
+            <p class="real-text">
+                After adjusting for inflation, the gender gap widens. Real net worth grew far more for male-headed households 
+                than female-headed households, showing unequal financial resilience across genders.
+            </p>
+        </div>
+
+        <!-- STEP 2 -->
+        <div class="step" data-step="2">
+            <h3>Age Tells a Different Story</h3>
+
+            <p class="nominal-text">
+                Middle-aged households (45–64) hold significantly more nominal wealth than younger or older households.
+                Younger households (under 35) have far lower net worth.
+            </p>
+
+            <p class="real-text">
+                Inflation-adjusted trends show that younger households lost even more ground.
+                While older and middle-aged groups preserved more real wealth, younger households' real net worth improved only minimally.
+            </p>
+        </div>
+
+        <!-- STEP 3 -->
+        <div class="step" data-step="3">
+            <h3>Education, the Problem</h3>
+
+            <p class="nominal-text">
+                Households with lower education levels have significantly less nominal net worth.
+            </p>
+
+            <p class="real-text">
+                When adjusted for inflation, all different kinds of educational level had a decrease for networth.
+            </p>
+        </div>
+
+        <!-- STEP 4 -->
+        <div class="step" data-step="4">
+            <h3>Therefore... Inequality Persists</h3>
+
+            <p class="nominal-text">
+                Despite overall nominal growth, the gains of economic expansion remain uneven across gender, age, and education.
+            </p>
+
+            <p class="real-text">
+                When we adjust for inflation, inequality becomes even more visible.  
+                Real wealth growth is concentrated among older, male, and highly educated households — 
+                widening disparities across the population.
+            </p>
         </div>
     </div>
 
-    
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script type="module" src="main.js"></script>
+    <!-- Sticky Chart -->
+    <div class="chart-container">
+        <svg id="chart" width="600" height="500"></svg>
+        <div class="legend-container" id="legend" style="display:none;"></div>
+    </div>
+</div>
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script type="module" src="main.js"></script>
 
 </body>
 </html>

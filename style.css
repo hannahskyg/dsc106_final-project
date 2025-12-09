@@ -1,183 +1,231 @@
 /* ------------ GLOBAL PAGE STYLING ------------ */
-  * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-        body {
-            font-family: "Inter", "Helvetica", Arial, sans-serif;
-            background: linear-gradient(145deg, #fafbff, #eef2ff);
-            color: #222;
-        }
+body {
+    font-family: "Inter", "Helvetica", Arial, sans-serif;
 
-        /* ------------ HEADER ------------ */
-        .header {
-            text-align: center;
-            padding: 60px 30px;
-            background: white;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        }
+    /* Merge your gradient + the pattern */
+    background: 
+        url("background-pattern.jpg") repeat,
+        linear-gradient(145deg, #fafbff, #eef2ff);
 
-        .header h1 {
-            font-size: 42px;
-            font-weight: 700;
-            margin-bottom: 15px;
-            color: #2a2a2a;
-        }
+    background-size: 300px 300px, auto;  /* Adjust pattern density */
+    color: #222;
+    background-attachment: fixed; /* Smooth scroll effect */
+}
 
-        .header h2 {
-            font-size: 24px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            color: #555;
-        }
+/* ------------ HEADER ------------ */
+.header {
+    text-align: center;
+    padding: 60px 30px;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    border-radius: 20px;
+    margin: 40px auto;
+    width: 90%;
+    max-width: 1200px;
+}
 
-        .header p {
-            font-size: 16px;
-            color: #666;
-            max-width: 800px;
-            margin: 0 auto;
-        }
+.header h1 {
+    font-size: 42px;
+    font-weight: 700;
+    margin-bottom: 15px;
+    color: #2a2a2a;
+}
 
-        /* ------------ SCROLLYTELLING CONTAINER ------------ */
-        #scroll-container {
-            position: relative;
-            display: flex;
-            min-height: 400vh;
-        }
+.header h2 {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #555;
+}
 
-        /* Text sections - left side */
-        .scroll-text {
-            width: 45%;
-            padding: 40px;
-        }
+.header p {
+    font-size: 16px;
+    color: #666;
+    max-width: 800px;
+    margin: 0 auto;
+}
 
-        .step {
-            min-height: 90vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 40px;
-            background: white;
-            margin-bottom: 30px;
-            border-radius: 16px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            opacity: 0.3;
-            transition: opacity 0.4s ease;
-        }
+#mode-toggle {
+    margin-top: 20px;
+    font-size: 16px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
 
-        .step.active {
-            opacity: 1;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
-        }
+#mode-toggle label {
+    cursor: pointer;
+    font-weight: 600;
+    color: #444;
+}
 
-        .step h3 {
-            font-size: 28px;
-            margin-bottom: 20px;
-            color: #2a2a2a;
-        }
+/* ------------ SCROLLYTELLING CONTAINER ------------ */
+#scroll-container {
+    position: relative;
+    display: flex;
+    min-height: 400vh;
+    gap: 30px;
+    width: 90%;
+    margin: auto;
+}
 
-        .step p {
-            font-size: 18px;
-            line-height: 1.7;
-            color: #444;
-            text-align: left;
-        }
+/* Left text sections */
+.scroll-text {
+    width: 45%;
+    padding: 40px;
+}
 
-        /* Chart container - sticky right side */
-        .chart-container {
-            position: sticky;
-            top: 80px;
-            width: 55%;
-            height: 600px;
-            padding: 30px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
+/* Your friend removed fading — so we keep it clean */
+.step {
+    min-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 40px;
+    background: white;
+    margin-bottom: 30px;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
 
-        #chart {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-            padding: 20px;
-        }
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    transition: none !important;
+}
 
-        /* Legend */
-        .legend-container {
-            display: flex;
-            justify-content: center;
-            gap: 25px;
-            margin-top: 20px;
-            padding: 15px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-        }
+.step.active {
+    box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+}
 
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-        }
+.step h3 {
+    font-size: 28px;
+    margin-bottom: 20px;
+    color: #2a2a2a;
+}
 
-        .legend-color {
-            width: 20px;
-            height: 20px;
-            border-radius: 4px;
-        }
+.step p {
+    font-size: 18px;
+    line-height: 1.7;
+    color: #444;
+    text-align: left;
+}
 
-        /* Axis styling */
-        .axis text {
-            font-size: 12px;
-            fill: #555;
-        }
+/* ------------ RIGHT SIDE CHART ------------ */
+.chart-container {
+    position: sticky;
+    top: 80px;
+    width: 55%;
+    height: 600px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
 
-        .axis line, .axis path {
-            stroke: #ccc;
-        }
+/* Allow axes to extend */
+.chart-container svg,
+#chart {
+    overflow: visible !important;
+}
 
-        rect {
-            rx: 4;
-            ry: 4;
-        }
+#chart {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    padding: 20px;
+}
 
-        /* Footer */
-        .footer {
-            text-align: center;
-            padding: 60px 30px;
-            background: white;
-            margin-top: 50px;
-        }
+/* Legend */
+.legend-container {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    margin-top: 20px;
+    padding: 15px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
 
-        .footer h2 {
-            font-size: 28px;
-            margin-bottom: 20px;
-        }
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
 
-        .footer p {
-            font-size: 16px;
-            max-width: 800px;
-            margin: 15px auto;
-            color: #555;
-            text-align: left;
-        }
+.legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+}
 
-        /* Mobile responsive */
-        @media (max-width: 968px) {
-            #scroll-container {
-                flex-direction: column;
-            }
-            
-            .scroll-text, .chart-container {
-                width: 100%;
-            }
-            
-            .chart-container {
-                position: relative;
-                top: 0;
-            }
-        }
+/* Axis styling */
+.axis text {
+    font-size: 12px;
+    fill: #555;
+}
+
+.axis line, .axis path {
+    stroke: #ccc;
+}
+
+rect {
+    rx: 4;
+    ry: 4;
+}
+
+/* ------------ FOOTER ------------ */
+.footer {
+    text-align: center;
+    padding: 60px 30px;
+    background: white;
+    margin: 60px auto;
+    width: 90%;
+    border-radius: 20px;
+}
+
+.footer h2 {
+    font-size: 28px;
+    margin-bottom: 20px;
+}
+
+.footer p {
+    font-size: 16px;
+    max-width: 800px;
+    margin: 15px auto;
+    color: #555;
+    text-align: left;
+}
+
+/* ------------ MOBILE ------------ */
+@media (max-width: 968px) {
+    #scroll-container {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .scroll-text, .chart-container {
+        width: 100%;
+    }
+
+    .chart-container {
+        position: relative;
+        top: 0;
+    }
+
+    .header {
+        width: 95%;
+    }
+
+    .footer {
+        width: 95%;
+    }
+}

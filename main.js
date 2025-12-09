@@ -1,14 +1,29 @@
+// ===========================================
+// REAL / NOMINAL TOGGLE MODE
+// ===========================================
+window.mode = "nominal"; // default
+
+// CPI (example values — replace with real dataset if needed)
+const CPI = {
+    2019: 255.7,
+    2022: 296.8
+};
+const CPI_REF = CPI[2022];
+
+function adjustForInflation(nominal, year) {
+    if (window.mode === "nominal") return +nominal;
+    return +nominal * (CPI_REF / CPI[year]);
+}
+
+// ===========================================
+// LOAD DATA
+// ===========================================
 const data2019 = await d3.csv("data/2019.csv");
 const data2022 = await d3.csv("data/2022.csv");
 
-// Use MEDIAN instead of MEAN for wealth data (more realistic)
-const median2019 = d3.median(data2019, d => +d.NETWORTH);
-const median2022 = d3.median(data2022, d => +d.NETWORTH);
-
-// Keep HHSEX as string (CSV values are strings "1" and "2")
-const medianBySex2019 = d3.rollups(data2019, v => d3.median(v, d => +d.NETWORTH), d => d.HHSEX);
-const medianBySex2022 = d3.rollups(data2022, v => d3.median(v, d => +d.NETWORTH), d => d.HHSEX);
-
+// ===========================================
+// GROUP HELPERS
+// ===========================================
 function getAgeGroup(age) {
     age = +age;
     if (age < 35) return "Under 35";
@@ -18,355 +33,458 @@ function getAgeGroup(age) {
     return "65+";
 }
 
-const medianByAge2019 = d3.rollups(data2019, v => d3.median(v, d => +d.NETWORTH), d => getAgeGroup(d.AGE));
-const medianByAge2022 = d3.rollups(data2022, v => d3.median(v, d => +d.NETWORTH), d => getAgeGroup(d.AGE));
+function mapEducation(code) {
+    code = +code;
+    if (code === 1) return "Less than HS";
+    if (code === 2) return "High School";
+    if (code === 3) return "Some College";
+    if (code === 4) return "Bachelor's";
+    if (code === 5 || code === 6 || code === 7) return "Graduate";
+    return null;
+}
 
-// Expanded education mapping - SCF typically uses this scale
-// Let's create a comprehensive mapping and log what we find
-const educMap = {
-    1: "No High School",
-    2: "High School", 
-    3: "Some College",
-    4: "College Degree",
-    // Additional common SCF codes
-    5: "Graduate Degree",
-    6: "Professional Degree",
-    7: "Doctorate"
-};
+// ===========================================
+// GENERALIZED MEDIAN FUNCTION (NOMINAL/REAL)
+// ===========================================
+function medianCalc(data, year) {
+    return d3.median(data, d => adjustForInflation(d.NETWORTH, year));
+}
 
-// Log unique education values to help debug
-console.log("Unique EDUC values in 2019:", [...new Set(data2019.map(d => d.EDUC))].sort());
-console.log("Unique EDUC values in 2022:", [...new Set(data2022.map(d => d.EDUC))].sort());
+// ===========================================
+// MEDIAN OVERALL
+// ===========================================
+function computeOverall() {
+    return [
+        { year: 2019, networth: medianCalc(data2019, 2019) },
+        { year: 2022, networth: medianCalc(data2022, 2022) }
+    ];
+}
 
-const medianByEduc2019 = d3.rollups(data2019, v => d3.median(v, d => +d.NETWORTH), d => educMap[d.EDUC] || `Unknown (${d.EDUC})`);
-const medianByEduc2022 = d3.rollups(data2022, v => d3.median(v, d => +d.NETWORTH), d => educMap[d.EDUC] || `Unknown (${d.EDUC})`);
+// ===========================================
+// SEX ROLLUPS
+// ===========================================
+function computeBySex() {
+    function roll(data, year) {
+        return d3.rollups(
+            data,
+            v => d3.median(v, d => adjustForInflation(d.NETWORTH, year)),
+            d => d.HHSEX
+        );
+    }
 
-// Log the results to verify
-console.log("Median by education 2019:", medianByEduc2019);
-console.log("Median by education 2022:", medianByEduc2022);
+    const r19 = roll(data2019, 2019);
+    const r22 = roll(data2022, 2022);
 
-// Overall median net worth for each year
-const overallData = [
-    { year: 2019, networth: median2019 },
-    { year: 2022, networth: median2022 }
-];
+    return [
+        { year: 2019, sex: "Male", networth: r19.find(d => d[0] === "1")?.[1] },
+        { year: 2019, sex: "Female", networth: r19.find(d => d[0] === "2")?.[1] },
+        { year: 2022, sex: "Male", networth: r22.find(d => d[0] === "1")?.[1] },
+        { year: 2022, sex: "Female", networth: r22.find(d => d[0] === "2")?.[1] }
+    ];
+}
 
-// Median net worth by household-head sex
-// HHSEX: "1" = Male, "2" = Female (CSV returns strings)
-const sexData = [
-    { year: 2019, sex: "Male", networth: medianBySex2019.find(d => d[0] === "1")?.[1] || 0 },
-    { year: 2019, sex: "Female", networth: medianBySex2019.find(d => d[0] === "2")?.[1] || 0 },
-    { year: 2022, sex: "Male", networth: medianBySex2022.find(d => d[0] === "1")?.[1] || 0 },
-    { year: 2022, sex: "Female", networth: medianBySex2022.find(d => d[0] === "2")?.[1] || 0 }
-];
+// ===========================================
+// AGE ROLLUPS
+// ===========================================
+function computeByAge() {
+    const roll19 = d3.rollups(
+        data2019,
+        v => d3.median(v, d => adjustForInflation(d.NETWORTH, 2019)),
+        d => getAgeGroup(d.AGE)
+    );
+    const roll22 = d3.rollups(
+        data2022,
+        v => d3.median(v, d => adjustForInflation(d.NETWORTH, 2022)),
+        d => getAgeGroup(d.AGE)
+    );
 
-console.log("Sex data:", sexData);
+    return [
+        ...roll19.map(d => ({ year: 2019, category: d[0], networth: d[1] })),
+        ...roll22.map(d => ({ year: 2022, category: d[0], networth: d[1] }))
+    ];
+}
 
-const ageOrder = ["Under 35", "35-44", "45-54", "55-64", "65+"];
-const ageData = [
-    ...medianByAge2019.map(d => ({ year: 2019, category: d[0], networth: d[1] })),
-    ...medianByAge2022.map(d => ({ year: 2022, category: d[0], networth: d[1] }))
-];
+// ===========================================
+// EDUCATION ROLLUPS
+// ===========================================
+function computeByEduc() {
+    const c19 = data2019.filter(d => mapEducation(d.EDUC));
+    const c22 = data2022.filter(d => mapEducation(d.EDUC));
 
-// Sort education data by actual wealth (ascending) to show proper hierarchy
-const educOrder = [...new Set([...medianByEduc2019, ...medianByEduc2022].map(d => d[0]))]
-    .sort((a, b) => {
-        const avg2019 = medianByEduc2019.find(d => d[0] === a)?.[1] || 0;
-        const avg2022 = medianByEduc2022.find(d => d[0] === a)?.[1] || 0;
-        const avgA = (avg2019 + avg2022) / 2;
-        
-        const avgB2019 = medianByEduc2019.find(d => d[0] === b)?.[1] || 0;
-        const avgB2022 = medianByEduc2022.find(d => d[0] === b)?.[1] || 0;
-        const avgB = (avgB2019 + avgB2022) / 2;
-        
-        return avgA - avgB;
-    });
+    const r19 = d3.rollups(
+        c19,
+        v => d3.median(v, d => adjustForInflation(d.NETWORTH, 2019)),
+        d => mapEducation(d.EDUC)
+    );
 
-const educData = [
-    ...medianByEduc2019.map(d => ({ year: 2019, category: d[0], networth: d[1] })),
-    ...medianByEduc2022.map(d => ({ year: 2022, category: d[0], networth: d[1] }))
-];
+    const r22 = d3.rollups(
+        c22,
+        v => d3.median(v, d => adjustForInflation(d.NETWORTH, 2022)),
+        d => mapEducation(d.EDUC)
+    );
 
-// Chart setup
+    return [
+        ...r19.map(d => ({ year: 2019, category: d[0], networth: d[1] })),
+        ...r22.map(d => ({ year: 2022, category: d[0], networth: d[1] }))
+    ];
+}
+
+// ===========================================
+// SCALES + SVG SETUP
+// ===========================================
 const svg = d3.select("#chart");
-const width = 600;
-const height = 500;
-const margin = { top: 50, right: 40, bottom: 80, left: 90 };
+const width = 600, height = 500;
+const margin = { top: 60, right: 40, bottom: 80, left: 90 };
 const chartWidth = width - margin.left - margin.right;
 const chartHeight = height - margin.top - margin.bottom;
 
-const g = svg.append("g").attr("transform", `translate(${margin.left}, ${margin.top})`);
+const g = svg.append("g")
+    .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-// Scales
-let x0 = d3.scaleBand().range([0, chartWidth]).padding(0.2);
-let x1 = d3.scaleBand().padding(0.1);
+let x0 = d3.scaleBand().range([0, chartWidth]).padding(0.25);
+let x1 = d3.scaleBand().padding(0.15);
 let y = d3.scaleLinear().range([chartHeight, 0]);
 
-const colorSex = d3.scaleOrdinal().domain(["Male", "Female"]).range(["#4a90e2", "#e94e77"]);
-const colorAge = d3.scaleOrdinal().domain(ageOrder).range(["#e94e77", "#f97316", "#eab308", "#22c55e", "#4a90e2"]);
-const colorEduc = d3.scaleOrdinal().domain(educOrder).range(d3.schemeSet2);
+const xAxisGroup = g.append("g").attr("transform", `translate(0, ${chartHeight})`);
+const yAxisGroup = g.append("g");
 
-// Axes
-const xAxisGroup = g.append("g").attr("class", "axis").attr("transform", `translate(0, ${chartHeight})`);
-const yAxisGroup = g.append("g").attr("class", "axis");
-
-// Title
 const title = svg.append("text")
     .attr("x", width / 2)
     .attr("y", 30)
     .attr("text-anchor", "middle")
     .style("font-size", "20px")
-    .style("font-weight", "600");
+    .style("font-weight", "700");
 
 const legend = d3.select("#legend");
 
-// Format currency for display
-function formatCurrency(value) {
-    if (value >= 1000000) {
-        return "$" + (value / 1000000).toFixed(2) + "M";
-    } else if (value >= 1000) {
-        return "$" + (value / 1000).toFixed(0) + "K";
-    } else {
-        return "$" + value.toFixed(0);
-    }
+function formatCurrency(v) {
+    if (v >= 1_000_000) return "$" + (v / 1_000_000).toFixed(2) + "M";
+    if (v >= 1000) return "$" + (v / 1000).toFixed(0) + "K";
+    return "$" + v;
 }
 
-// Render functions
-function renderOverall() {
-    title.text("Median U.S. Household Net Worth");
-    legend.style("display", "none");
-    
-    g.selectAll(".year-group").remove();
-    
-    x0.domain(overallData.map(d => d.year));
-    y.domain([0, d3.max(overallData, d => d.networth) * 1.1]);
-
-    const bars = g.selectAll(".bar").data(overallData, d => d.year);
-    
-    bars.exit().transition().duration(500).attr("height", 0).attr("y", chartHeight).remove();
-    
-    const barsEnter = bars.enter().append("rect").attr("class", "bar");
-    
-    bars.merge(barsEnter)
-        .transition().duration(800)
-        .attr("x", d => x0(d.year))
-        .attr("width", x0.bandwidth())
-        .attr("y", d => y(d.networth))
-        .attr("height", d => chartHeight - y(d.networth))
-        .attr("fill", "#4a90e2");
-
-    xAxisGroup.transition().duration(500).call(d3.axisBottom(x0));
-    yAxisGroup.transition().duration(500).call(d3.axisLeft(y).ticks(5).tickFormat(formatCurrency));
-}
-
-function renderGrouped(data, categories, colorScale, titleText) {
-    title.text(titleText);
-    
-    g.selectAll(".bar").remove();
+function clearChart() {
+    g.selectAll("rect").remove();
     g.selectAll(".year-group").remove();
     g.selectAll(".value-label").remove();
+    g.selectAll(".zero-line").remove();   // <-- FIX: remove baseline line
+    legend.html("").style("display", "none");
+}
 
-    const years = [2019, 2022];
-    
-    x0.domain(years);
-    x1.domain(categories).range([0, x0.bandwidth()]);
-    y.domain([0, d3.max(data, d => d.networth) * 1.1]);
+// ===========================================
+// RENDER FUNCTIONS (Adjusted for REAL/NOMINAL)
+// ===========================================
+function renderOverall() {
+    clearChart();
+    title.text(
+        window.mode === "nominal"
+            ? "Median U.S. Household Net Worth"
+            : "Real Median Net Worth (Inflation-adjusted)"
+    );
 
-    const groups = g.selectAll(".year-group")
-        .data(years)
-        .enter()
-        .append("g")
-        .attr("class", "year-group")
-        .attr("transform", year => `translate(${x0(year)}, 0)`);
+    const data = computeOverall();
+    x0.domain([2019, 2022]);
+    y.domain([0, d3.max(data, d => d.networth) * 1.2]);
 
-    // Draw bars
-    const bars = groups.selectAll("rect")
-        .data(year => data.filter(d => d.year === year))
+    g.selectAll(".bar")
+        .data(data)
         .enter()
         .append("rect")
-        .attr("x", d => x1(d.category))
-        .attr("width", x1.bandwidth())
+        .attr("x", d => x0(d.year))
         .attr("y", chartHeight)
         .attr("height", 0)
-        .attr("fill", d => colorScale(d.category));
-    
-    bars.transition().duration(800)
+        .attr("width", x0.bandwidth())
+        .attr("fill", "#4a90e2")
+        .transition()
+        .duration(800)
         .attr("y", d => y(d.networth))
         .attr("height", d => chartHeight - y(d.networth));
 
-    // Add value labels on top of bars to make small bars visible
-    const labels = groups.selectAll("text")
-        .data(year => data.filter(d => d.year === year))
-        .enter()
-        .append("text")
-        .attr("class", "value-label")
-        .attr("x", d => x1(d.category) + x1.bandwidth() / 2)
-        .attr("y", chartHeight)
-        .attr("text-anchor", "middle")
-        .style("font-size", "11px")
-        .style("font-weight", "600")
-        .style("fill", "#333")
-        .text(d => formatCurrency(d.networth));
-    
-    labels.transition().duration(800)
-        .attr("y", d => y(d.networth) - 5);
-
-    xAxisGroup.transition().duration(500).call(d3.axisBottom(x0));
-    yAxisGroup.transition().duration(500).call(d3.axisLeft(y).ticks(5).tickFormat(formatCurrency));
-
-    // Update legend
-    legend.style("display", "flex");
-    legend.html("");
-    categories.forEach(cat => {
-        const item = legend.append("div").attr("class", "legend-item");
-        item.append("div").attr("class", "legend-color").style("background", colorScale(cat));
-        item.append("span").text(cat);
-    });
+    xAxisGroup.call(d3.axisBottom(x0));
+    yAxisGroup.call(d3.axisLeft(y).ticks(5).tickFormat(formatCurrency));
 }
 
 function renderBySex() {
-    title.text("Median Net Worth by Household Head Sex");
-    
-    g.selectAll(".bar").remove();
-    g.selectAll(".year-group").remove();
-    g.selectAll(".value-label").remove();
+    clearChart();
+    title.text(
+        window.mode === "nominal"
+            ? "Median Net Worth by Sex"
+            : "Real Net Worth by Sex (Inflation-adjusted)"
+    );
 
+    const data = computeBySex();
     const years = [2019, 2022];
     const sexes = ["Male", "Female"];
-    
+
     x0.domain(years);
     x1.domain(sexes).range([0, x0.bandwidth()]);
-    y.domain([0, d3.max(sexData, d => d.networth) * 1.1]);
+    y.domain([0, d3.max(data, d => d.networth) * 1.2]);
 
     const groups = g.selectAll(".year-group")
         .data(years)
         .enter()
         .append("g")
         .attr("class", "year-group")
-        .attr("transform", year => `translate(${x0(year)}, 0)`);
+        .attr("transform", d => `translate(${x0(d)},0)`);
 
-    // Draw bars
-    const bars = groups.selectAll("rect")
-        .data(year => sexData.filter(d => d.year === year))
+    groups.selectAll("rect")
+        .data(d => data.filter(s => s.year === d))
         .enter()
         .append("rect")
         .attr("x", d => x1(d.sex))
         .attr("width", x1.bandwidth())
         .attr("y", chartHeight)
         .attr("height", 0)
-        .attr("fill", d => colorSex(d.sex));
-    
-    bars.transition().duration(800)
+        .attr("fill", d => (d.sex === "Male" ? "#4a90e2" : "#e94e77"))
+        .transition()
+        .duration(800)
         .attr("y", d => y(d.networth))
         .attr("height", d => chartHeight - y(d.networth));
 
-    // Add value labels on top of bars
-    const labels = groups.selectAll("text")
-        .data(year => sexData.filter(d => d.year === year))
+    groups.selectAll(".value-label")
+        .data(d => data.filter(s => s.year === d))
         .enter()
         .append("text")
         .attr("class", "value-label")
         .attr("x", d => x1(d.sex) + x1.bandwidth() / 2)
-        .attr("y", chartHeight)
+        .attr("y", d => y(d.networth) - 5)
         .attr("text-anchor", "middle")
         .style("font-size", "11px")
-        .style("font-weight", "600")
-        .style("fill", "#333")
         .text(d => formatCurrency(d.networth));
-    
-    labels.transition().duration(800)
-        .attr("y", d => y(d.networth) - 5);
 
-    xAxisGroup.transition().duration(500).call(d3.axisBottom(x0));
-    yAxisGroup.transition().duration(500).call(d3.axisLeft(y).ticks(5).tickFormat(formatCurrency));
+    xAxisGroup.call(d3.axisBottom(x0));
+    yAxisGroup.call(d3.axisLeft(y).ticks(5).tickFormat(formatCurrency));
 
-    // Update legend
     legend.style("display", "flex");
-    legend.html("");
-    sexes.forEach(sex => {
+    ["Male", "Female"].forEach(sex => {
         const item = legend.append("div").attr("class", "legend-item");
-        item.append("div").attr("class", "legend-color").style("background", colorSex(sex));
+        item.append("div")
+            .attr("class", "legend-color")
+            .style("background", sex === "Male" ? "#4a90e2" : "#e94e77");
         item.append("span").text(sex);
     });
 }
 
 function renderByAge() {
-    renderGrouped(ageData, ageOrder, colorAge, "Median Net Worth by Age Group");
+    clearChart();
+    title.text(
+        window.mode === "nominal"
+            ? "Median Net Worth by Age Group"
+            : "Real Net Worth by Age Group (Inflation-adjusted)"
+    );
+
+    const data = computeByAge();
+    const years = [2019, 2022];
+    const ageOrder = ["Under 35", "35-44", "45-54", "55-64", "65+"];
+
+    x0.domain(years);
+    x1.domain(ageOrder).range([0, x0.bandwidth()]);
+    y.domain([0, d3.max(data, d => d.networth) * 1.2]);
+
+    const colorAge = d3.scaleOrdinal()
+        .domain(ageOrder)
+        .range(["#e94e77", "#f97316", "#eab308", "#22c55e", "#4a90e2"]);
+
+    const groups = g.selectAll(".year-group")
+        .data(years)
+        .enter()
+        .append("g")
+        .attr("class", "year-group")
+        .attr("transform", d => `translate(${x0(d)},0)`);
+
+    groups.selectAll("rect")
+        .data(d => data.filter(a => a.year === d))
+        .enter()
+        .append("rect")
+        .attr("x", d => x1(d.category))
+        .attr("width", x1.bandwidth())
+        .attr("y", chartHeight)
+        .attr("height", 0)
+        .attr("fill", d => colorAge(d.category))
+        .transition()
+        .duration(800)
+        .attr("y", d => y(d.networth))
+        .attr("height", d => chartHeight - y(d.networth));
+
+    groups.selectAll(".value-label")
+        .data(d => data.filter(a => a.year === d))
+        .enter()
+        .append("text")
+        .attr("class", "value-label")
+        .attr("x", d => x1(d.category) + x1.bandwidth() / 2)
+        .attr("y", d => y(d.networth) - 5)
+        .attr("text-anchor", "middle")
+        .style("font-size", "11px")
+        .text(d => formatCurrency(d.networth));
+
+    xAxisGroup.call(d3.axisBottom(x0));
+    yAxisGroup.call(d3.axisLeft(y).ticks(5).tickFormat(formatCurrency));
+
+    legend.style("display", "flex");
+    ageOrder.forEach(cat => {
+        const item = legend.append("div").attr("class", "legend-item");
+        item.append("div")
+            .attr("class", "legend-color")
+            .style("background", colorAge(cat));
+        item.append("span").text(cat);
+    });
 }
 
 function renderByEducation() {
-    renderGrouped(educData, educOrder, colorEduc, "Median Net Worth by Education Level");
-}
+    clearChart();
+    title.text(
+        window.mode === "nominal"
+            ? "Median Net Worth by Education Level"
+            : "Real Net Worth by Education (Inflation-adjusted)"
+    );
 
-// For the final comparison, show percentage change by category
-function renderFinalComparison() {
-    title.text("Wealth Growth 2019-2022: Who Benefited Most?");
-    
-    g.selectAll(".bar").remove();
-    g.selectAll(".year-group").remove();
-    legend.style("display", "none");
+    const data = computeByEduc();
+    const years = [2019, 2022];
+    const order = ["Less than HS", "High School", "Some College", "Bachelor's", "Graduate"];
 
-    // Calculate percentage changes for each demographic
-    const changes = [];
-    
-    // Overall
-    changes.push({
-        category: "Overall",
-        change: ((median2022 - median2019) / median2019) * 100
-    });
-    
-    // By sex
-    const male2019 = sexData.find(d => d.year === 2019 && d.sex === "Male")?.networth || 0;
-    const male2022 = sexData.find(d => d.year === 2022 && d.sex === "Male")?.networth || 0;
-    const female2019 = sexData.find(d => d.year === 2019 && d.sex === "Female")?.networth || 0;
-    const female2022 = sexData.find(d => d.year === 2022 && d.sex === "Female")?.networth || 0;
-    
-    if (male2019 > 0) changes.push({ category: "Male HH", change: ((male2022 - male2019) / male2019) * 100 });
-    if (female2019 > 0) changes.push({ category: "Female HH", change: ((female2022 - female2019) / female2019) * 100 });
-    
-    // By age groups - show a few key ones
-    ["Under 35", "45-54", "65+"].forEach(ageGroup => {
-        const age2019 = ageData.find(d => d.year === 2019 && d.category === ageGroup)?.networth || 0;
-        const age2022 = ageData.find(d => d.year === 2022 && d.category === ageGroup)?.networth || 0;
-        if (age2019 > 0) changes.push({ category: ageGroup, change: ((age2022 - age2019) / age2019) * 100 });
-    });
+    const colorEduc = d3.scaleOrdinal()
+        .domain(order)
+        .range(d3.schemeSet2);
 
-    x0.domain(changes.map(d => d.category));
-    y.domain([d3.min(changes, d => d.change) * 1.2, d3.max(changes, d => d.change) * 1.2]);
+    x0.domain(years);
+    x1.domain(order).range([0, x0.bandwidth()]);
+    y.domain([0, d3.max(data, d => d.networth) * 1.2]);
 
-    const bars = g.selectAll(".bar")
-        .data(changes)
+    const groups = g.selectAll(".year-group")
+        .data(years)
+        .enter()
+        .append("g")
+        .attr("class", "year-group")
+        .attr("transform", d => `translate(${x0(d)},0)`);
+
+    groups.selectAll("rect")
+        .data(d => data.filter(e => e.year === d))
         .enter()
         .append("rect")
-        .attr("class", "bar")
-        .attr("x", d => x0(d.category))
-        .attr("width", x0.bandwidth())
+        .attr("x", d => x1(d.category))
+        .attr("width", x1.bandwidth())
         .attr("y", chartHeight)
         .attr("height", 0)
-        .attr("fill", d => d.change >= 0 ? "#22c55e" : "#ef4444")
-        .transition().duration(800)
-        .attr("y", d => d.change >= 0 ? y(d.change) : y(0))
-        .attr("height", d => Math.abs(y(d.change) - y(0)));
+        .attr("fill", d => colorEduc(d.category))
+        .transition()
+        .duration(800)
+        .attr("y", d => y(d.networth))
+        .attr("height", d => chartHeight - y(d.networth));
 
-    // Add zero line
-    g.append("line")
-        .attr("x1", 0)
-        .attr("x2", chartWidth)
-        .attr("y1", y(0))
-        .attr("y2", y(0))
-        .attr("stroke", "#666")
-        .attr("stroke-width", 2)
-        .attr("stroke-dasharray", "5,5");
+    groups.selectAll(".value-label")
+        .data(d => data.filter(e => e.year === d))
+        .enter()
+        .append("text")
+        .attr("class", "value-label")
+        .attr("x", d => x1(d.category) + x1.bandwidth() / 2)
+        .attr("y", d => y(d.networth) - 5)
+        .attr("text-anchor", "middle")
+        .style("font-size", "11px")
+        .text(d => formatCurrency(d.networth));
 
-    xAxisGroup.transition().duration(500).call(d3.axisBottom(x0))
-        .selectAll("text")
-        .attr("transform", "rotate(-45)")
-        .style("text-anchor", "end");
-    
-    yAxisGroup.transition().duration(500).call(d3.axisLeft(y).ticks(5).tickFormat(d => d.toFixed(0) + "%"));
+    xAxisGroup.call(d3.axisBottom(x0));
+    yAxisGroup.call(d3.axisLeft(y).ticks(5).tickFormat(formatCurrency));
+
+    legend.style("display", "flex");
+    order.forEach(cat => {
+        const item = legend.append("div").attr("class", "legend-item");
+        item.append("div")
+            .attr("class", "legend-color")
+            .style("background", colorEduc(cat));
+        item.append("span").text(cat);
+    });
 }
 
-// Scrollytelling logic
+// ===========================================
+// FINAL COMPARISON
+// ===========================================
+function renderFinalComparison() {
+    clearChart();
+    title.text(
+        window.mode === "nominal"
+            ? "Wealth Growth 2019–2022: Who Benefited Most?"
+            : "Real Wealth Growth (Inflation-adjusted)"
+    );
+
+    const overall = computeOverall();
+    const sex = computeBySex();
+    const age = computeByAge();
+
+    function pct(oldV, newV) {
+        return ((newV - oldV) / oldV) * 100;
+    }
+
+    const categories = [];
+
+    categories.push({
+        category: "Overall",
+        change: pct(overall[0].networth, overall[1].networth)
+    });
+
+    // Male
+    const m19 = sex.find(d => d.sex === "Male" && d.year === 2019)?.networth;
+    const m22 = sex.find(d => d.sex === "Male" && d.year === 2022)?.networth;
+    categories.push({ category: "Male HH", change: pct(m19, m22) });
+
+    // Female
+    const f19 = sex.find(d => d.sex === "Female" && d.year === 2019)?.networth;
+    const f22 = sex.find(d => d.sex === "Female" && d.year === 2022)?.networth;
+    categories.push({ category: "Female HH", change: pct(f19, f22) });
+
+    ["Under 35", "45-54", "65+"].forEach(a => {
+        const a19 = age.find(d => d.category === a && d.year === 2019)?.networth;
+        const a22 = age.find(d => d.category === a && d.year === 2022)?.networth;
+        if (a19 && a22) {
+            categories.push({ category: a, change: pct(a19, a22) });
+        }
+    });
+
+    x0.domain(categories.map(d => d.category));
+    y.domain([
+        Math.min(0, d3.min(categories, d => d.change)),
+        d3.max(categories, d => d.change) * 1.2
+    ]);
+
+    g.selectAll("rect")
+        .data(categories)
+        .enter()
+        .append("rect")
+        .attr("x", d => x0(d.category))
+        .attr("width", x0.bandwidth())
+        .attr("y", y(0))
+        .attr("height", 0)
+        .attr("fill", d => d.change >= 0 ? "#22c55e" : "#ef4444")
+        .transition()
+        .duration(800)
+        .attr("y", d => Math.min(y(d.change), y(0)))
+        .attr("height", d => Math.abs(y(d.change) - y(0)));
+
+    g.selectAll(".value-label")
+        .data(categories)
+        .enter()
+        .append("text")
+        .attr("class", "value-label")
+        .attr("x", d => x0(d.category) + x0.bandwidth() / 2)
+        .attr("y", d => y(d.change) - 5)
+        .attr("text-anchor", "middle")
+        .style("font-size", "11px")
+        .text(d => d.change.toFixed(0) + "%");
+
+    // Zero line
+    g.append("line")
+        .attr("class", "zero-line")
+        .attr("x1", 0).attr("x2", chartWidth)
+        .attr("y1", y(0)).attr("y2", y(0))
+        .attr("stroke", "#555")
+        .attr("stroke-width", 1.5);
+
+    xAxisGroup.call(d3.axisBottom(x0).tickFormat(d => d));
+    yAxisGroup.call(d3.axisLeft(y).ticks(5).tickFormat(d => d + "%"));
+}
+
+// ===========================================
+// SCROLL HANDLING
+// ===========================================
 let currentStep = 0;
 
 const steps = document.querySelectorAll(".step");
@@ -376,23 +494,13 @@ function updateChart(stepIndex) {
     if (stepIndex === currentStep) return;
     currentStep = stepIndex;
 
-    switch(stepIndex) {
-        case 0:
-            renderOverall();
-            break;
-        case 1:
-            renderBySex();
-            break;
-        case 2:
-            renderByAge();
-            break;
-        case 3:
-            renderByEducation();
-            break;
-        case 4:
-            renderFinalComparison();
-            break;
-    }
+    if (stepIndex === 0) renderOverall();
+    if (stepIndex === 1) renderBySex();
+    if (stepIndex === 2) renderByAge();
+    if (stepIndex === 3) renderByEducation();
+    if (stepIndex === 4) renderFinalComparison();
+
+    updateTextVisibility();
 }
 
 function checkScroll() {
@@ -401,13 +509,13 @@ function checkScroll() {
 
     steps.forEach((step, i) => {
         const stepTop = step.offsetTop + containerTop;
-        const stepBottom = stepTop + step.offsetHeight;
-        
-        if (scrollTop >= stepTop - window.innerHeight / 2 && scrollTop < stepBottom - window.innerHeight / 2) {
-            step.classList.add("active");
+        const stepHeight = step.offsetHeight;
+
+        if (
+            scrollTop >= stepTop - window.innerHeight / 2 &&
+            scrollTop < stepTop + stepHeight - window.innerHeight / 2
+        ) {
             updateChart(i);
-        } else {
-            step.classList.remove("active");
         }
     });
 }
@@ -415,6 +523,30 @@ function checkScroll() {
 window.addEventListener("scroll", checkScroll);
 window.addEventListener("resize", checkScroll);
 
-// Initial render
+// ===========================================
+// TEXT TOGGLE HANDLING
+// ===========================================
+function updateTextVisibility() {
+    const isNominal = window.mode === "nominal";
+
+    document.querySelectorAll(".nominal-text").forEach(el => {
+        el.style.display = isNominal ? "block" : "none";
+    });
+    document.querySelectorAll(".real-text").forEach(el => {
+        el.style.display = isNominal ? "none" : "block";
+    });
+}
+
+// Listen for toggle
+document.querySelectorAll("input[name='mode']").forEach(input => {
+    input.addEventListener("change", () => {
+        window.mode = input.value;
+        updateChart(currentStep);
+        updateTextVisibility();
+    });
+});
+
+// Initial load
 renderOverall();
+updateTextVisibility();
 checkScroll();
