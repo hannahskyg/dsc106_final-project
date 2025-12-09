@@ -9,7 +9,7 @@
 
 <body>
 
-<!-- FIXED MODE TOGGLE - Now outside header and stays visible -->
+<!-- FIXED MODE TOGGLE -->
 <div id="mode-toggle">
     <label><input type="radio" name="mode" value="nominal" checked> Nominal</label>
     <label><input type="radio" name="mode" value="real"> Real (Inflation-adjusted)</label>
@@ -27,79 +27,34 @@
 
     <!-- Text Steps -->
     <div class="scroll-text">
-
-        <!-- STEP 0 -->
         <div class="step" data-step="0">
             <h3>Wealth is Growing… or is it?</h3>
-
-            <!-- NOMINAL -->
-            <p class="nominal-text">
-                Between 2019 and 2022, the average American household saw their net worth increase significantly in nominal terms.
-            </p>
-
-            <!-- REAL -->
-            <p class="real-text">
-                Although nominal net worth increased between 2019 and 2022, inflation eroded much of the gain.
-                In real terms (inflation-adjusted), wealth grew far less — suggesting households did not become as wealthy
-                as it appears. 
-            </p>
+            <p class="nominal-text">Between 2019 and 2022, the average American household saw their net worth increase significantly in nominal terms.</p>
+            <p class="real-text">Although nominal net worth increased, inflation eroded much of the gain. Real wealth grew far less than it appears.</p>
         </div>
 
-        <!-- STEP 1 -->
         <div class="step" data-step="1">
             <h3>But... Not Everyone Benefits Equally</h3>
-
-            <p class="nominal-text">
-                Breaking down the data by sex reveals disparities. Female-headed households experienced a smaller nominal increase in net worth than male-headed households.
-            </p>
-
-            <p class="real-text">
-                After adjusting for inflation, the gender gap widens. Real net worth grew far more for male-headed households 
-                than female-headed households, showing unequal financial resilience across genders.
-            </p>
+            <p class="nominal-text">Female-headed households experienced a smaller nominal increase than male-headed households.</p>
+            <p class="real-text">After inflation adjustment, the gender gap widens: male-headed households gained more real wealth.</p>
         </div>
 
-        <!-- STEP 2 -->
         <div class="step" data-step="2">
             <h3>Age Tells a Different Story</h3>
-
-            <p class="nominal-text">
-                Middle-aged households (45–64) hold significantly more nominal wealth than younger or older households.
-                Younger households (under 35) have far lower net worth.
-            </p>
-
-            <p class="real-text">
-                Inflation-adjusted trends show that younger households lost even more ground.
-                While older and middle-aged groups preserved more real wealth, younger households' real net worth improved only minimally.
-            </p>
+            <p class="nominal-text">Middle-aged households (45–64) hold significantly more nominal wealth than younger or older households.</p>
+            <p class="real-text">Younger households lost more ground after inflation adjustment, while older/middle-aged households preserved more real wealth.</p>
         </div>
 
-        <!-- STEP 3 -->
         <div class="step" data-step="3">
             <h3>Education, the Problem</h3>
-
-            <p class="nominal-text">
-                Households with lower education levels have significantly less nominal net worth.
-            </p>
-
-            <p class="real-text">
-                When adjusted for inflation, all different kinds of educational level had a decrease for networth.
-            </p>
+            <p class="nominal-text">Households with lower education levels have significantly less nominal net worth.</p>
+            <p class="real-text">After inflation adjustment, all education levels experienced net worth decreases.</p>
         </div>
 
-        <!-- STEP 4 -->
         <div class="step" data-step="4">
             <h3>Therefore... Inequality Persists</h3>
-
-            <p class="nominal-text">
-                Despite overall nominal growth, the gains of economic expansion remain uneven across gender, age, and education.
-            </p>
-
-            <p class="real-text">
-                When we adjust for inflation, inequality becomes even more visible.  
-                Real wealth growth is concentrated among older, male, and highly educated households — 
-                widening disparities across the population.
-            </p>
+            <p class="nominal-text">Despite overall growth, gains are uneven across gender, age, and education.</p>
+            <p class="real-text">Real wealth growth is concentrated among older, male, and highly educated households, widening disparities.</p>
         </div>
     </div>
 
@@ -109,6 +64,47 @@
         <div class="legend-container" id="legend" style="display:none;"></div>
     </div>
 </div>
+
+<!-- Interactive Chart Section -->
+<div class="footer">
+    <h2>Explore the Data Yourself</h2>
+    <p>Select which categories you want to compare and see how different groups experienced wealth changes between 2019 and 2022.</p>
+</div>
+
+<!-- Collapsible Category Selector -->
+<div class="collapsible-container">
+    <button class="collapsible">Overall</button>
+    <div class="content-block">
+        <label><input type="checkbox" data-category="overall" checked> Overall</label>
+    </div>
+
+    <button class="collapsible">Sex</button>
+    <div class="content-block">
+        <label><input type="checkbox" data-category="male"> Male</label><br>
+        <label><input type="checkbox" data-category="female"> Female</label>
+    </div>
+
+    <button class="collapsible">Age Group</button>
+    <div class="content-block">
+        <label><input type="checkbox" data-category="under35"> Under 35</label><br>
+        <label><input type="checkbox" data-category="age3544"> 35-44</label><br>
+        <label><input type="checkbox" data-category="age4554"> 45-54</label><br>
+        <label><input type="checkbox" data-category="age5564"> 55-64</label><br>
+        <label><input type="checkbox" data-category="age65plus"> 65+</label>
+    </div>
+
+    <button class="collapsible">Education</button>
+    <div class="content-block">
+        <label><input type="checkbox" data-category="lessHS"> Less than High School</label><br>
+        <label><input type="checkbox" data-category="highSchool"> High School</label><br>
+        <label><input type="checkbox" data-category="someCollege"> Some College</label><br>
+        <label><input type="checkbox" data-category="bachelors"> Bachelor's Degree</label><br>
+        <label><input type="checkbox" data-category="graduate"> Graduate Degree</label>
+    </div>
+</div>
+
+<!-- Interactive Chart Display -->
+<div id="interactive-chart-container" style="margin: 40px auto; max-width: 900px;"></div>
 
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <script type="module" src="main.js"></script>

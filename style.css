@@ -259,3 +259,31 @@ rect {
         width: 95%;
     }
 }
+.collapsible-container {
+    width: 100%;
+    max-width: 600px;
+    margin: 20px auto;
+}
+
+.collapsible {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    text-align: left;
+    background-color: #eee;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    margin-bottom: 4px;
+}
+
+.collapsible.active {
+    background-color: #ccc;
+}
+
+.content-block {
+    display: none;
+    padding: 0 18px;
+    margin-bottom: 8px;
+    border-left: 3px solid #ccc;
+}

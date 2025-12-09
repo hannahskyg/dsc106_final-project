@@ -21,7 +21,7 @@ function adjustForInflation(nominal, year) {
 const data2019 = await d3.csv("data/2019.csv");
 const data2022 = await d3.csv("data/2022.csv");
 
-console.log("Data loaded:", data2019.length, data2022.length); // Debug
+console.log("Data loaded:", data2019.length, data2022.length);
 
 // ===========================================
 // GROUP HELPERS
@@ -132,7 +132,7 @@ function computeByEduc() {
 }
 
 // ===========================================
-// SCALES + SVG SETUP
+// SCALES + SVG SETUP (MAIN CHART)
 // ===========================================
 const svg = d3.select("#chart");
 const width = 600, height = 500;
@@ -423,12 +423,10 @@ function renderFinalComparison() {
         change: pct(overall[0].networth, overall[1].networth)
     });
 
-    // Male
     const m19 = sex.find(d => d.sex === "Male" && d.year === 2019)?.networth;
     const m22 = sex.find(d => d.sex === "Male" && d.year === 2022)?.networth;
     categories.push({ category: "Male HH", change: pct(m19, m22) });
 
-    // Female
     const f19 = sex.find(d => d.sex === "Female" && d.year === 2019)?.networth;
     const f22 = sex.find(d => d.sex === "Female" && d.year === 2022)?.networth;
     categories.push({ category: "Female HH", change: pct(f19, f22) });
@@ -472,7 +470,6 @@ function renderFinalComparison() {
         .style("font-size", "11px")
         .text(d => d.change.toFixed(0) + "%");
 
-    // Zero line
     g.append("line")
         .attr("class", "zero-line")
         .attr("x1", 0).attr("x2", chartWidth)
@@ -526,7 +523,7 @@ window.addEventListener("scroll", checkScroll);
 window.addEventListener("resize", checkScroll);
 
 // ===========================================
-// TEXT TOGGLE HANDLING - FIXED!
+// TEXT TOGGLE HANDLING
 // ===========================================
 function updateTextVisibility() {
     const isNominal = window.mode === "nominal";
@@ -539,19 +536,17 @@ function updateTextVisibility() {
     });
 }
 
-// CRITICAL FIX: Wait for DOM to be ready, then attach listeners
 function initToggle() {
-    console.log("Initializing toggle listeners..."); // Debug
+    console.log("Initializing toggle listeners...");
     
     const radioButtons = document.querySelectorAll("input[name='mode']");
-    console.log("Found radio buttons:", radioButtons.length); // Debug
+    console.log("Found radio buttons:", radioButtons.length);
     
     radioButtons.forEach(input => {
         input.addEventListener("change", (e) => {
-            console.log("Mode changed to:", e.target.value); // Debug
+            console.log("Mode changed to:", e.target.value);
             window.mode = e.target.value;
             
-            // Force re-render of current step
             if (currentStep === 0) renderOverall();
             else if (currentStep === 1) renderBySex();
             else if (currentStep === 2) renderByAge();
@@ -559,14 +554,247 @@ function initToggle() {
             else if (currentStep === 4) renderFinalComparison();
             
             updateTextVisibility();
+            renderInteractiveChart();
         });
     });
 }
 
-// Call init function to set up listeners
+// ===========================================
+// INTERACTIVE COLLAPSIBLE CHART (NEW!)
+// ===========================================
+
+// Track selected categories
+const selectedCategories = {
+    overall: true,
+    male: false,
+    female: false,
+    under35: false,
+    age3544: false,
+    age4554: false,
+    age5564: false,
+    age65plus: false,
+    lessHS: false,
+    highSchool: false,
+    someCollege: false,
+    bachelors: false,
+    graduate: false
+};
+
+function getAllPercentageChanges() {
+    const overall = computeOverall();
+    const sex = computeBySex();
+    const age = computeByAge();
+    const educ = computeByEduc();
+
+    function pct(oldV, newV) {
+        return ((newV - oldV) / oldV) * 100;
+    }
+
+    const allData = [];
+
+    // Overall
+    if (selectedCategories.overall) {
+        allData.push({
+            category: "Overall",
+            change: pct(overall[0].networth, overall[1].networth),
+            group: "overall"
+        });
+    }
+
+    // Sex
+    if (selectedCategories.male) {
+        const m19 = sex.find(d => d.sex === "Male" && d.year === 2019)?.networth;
+        const m22 = sex.find(d => d.sex === "Male" && d.year === 2022)?.networth;
+        allData.push({ category: "Male", change: pct(m19, m22), group: "sex" });
+    }
+    if (selectedCategories.female) {
+        const f19 = sex.find(d => d.sex === "Female" && d.year === 2019)?.networth;
+        const f22 = sex.find(d => d.sex === "Female" && d.year === 2022)?.networth;
+        allData.push({ category: "Female", change: pct(f19, f22), group: "sex" });
+    }
+
+    // Age groups
+    const ageMap = {
+        under35: "Under 35",
+        age3544: "35-44",
+        age4554: "45-54",
+        age5564: "55-64",
+        age65plus: "65+"
+    };
+    
+    Object.keys(ageMap).forEach(key => {
+        if (selectedCategories[key]) {
+            const ageLabel = ageMap[key];
+            const a19 = age.find(d => d.category === ageLabel && d.year === 2019)?.networth;
+            const a22 = age.find(d => d.category === ageLabel && d.year === 2022)?.networth;
+            if (a19 && a22) {
+                allData.push({ category: ageLabel, change: pct(a19, a22), group: "age" });
+            }
+        }
+    });
+
+    // Education
+    const educMap = {
+        lessHS: "Less than HS",
+        highSchool: "High School",
+        someCollege: "Some College",
+        bachelors: "Bachelor's",
+        graduate: "Graduate"
+    };
+
+    Object.keys(educMap).forEach(key => {
+        if (selectedCategories[key]) {
+            const educLabel = educMap[key];
+            const e19 = educ.find(d => d.category === educLabel && d.year === 2019)?.networth;
+            const e22 = educ.find(d => d.category === educLabel && d.year === 2022)?.networth;
+            if (e19 && e22) {
+                allData.push({ category: educLabel, change: pct(e19, e22), group: "education" });
+            }
+        }
+    });
+
+    return allData;
+}
+
+function renderInteractiveChart() {
+    const container = document.getElementById("interactive-chart-container");
+    if (!container) return;
+
+    // Clear previous chart
+    container.innerHTML = "";
+
+    const data = getAllPercentageChanges();
+
+    if (data.length === 0) {
+        container.innerHTML = "<p style='text-align:center; padding:40px; color:#888;'>Select at least one category to display the chart</p>";
+        return;
+    }
+
+    // Create SVG
+    const svg = d3.select(container)
+        .append("svg")
+        .attr("width", 800)
+        .attr("height", 500)
+        .style("background", "white")
+        .style("border-radius", "12px")
+        .style("box-shadow", "0 4px 15px rgba(0,0,0,0.1)")
+        .style("margin", "0 auto")
+        .style("display", "block");
+
+    const margin = { top: 60, right: 40, bottom: 100, left: 90 };
+    const width = 800 - margin.left - margin.right;
+    const height = 500 - margin.top - margin.bottom;
+
+    const g = svg.append("g")
+        .attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+    // Scales
+    const x = d3.scaleBand()
+        .domain(data.map(d => d.category))
+        .range([0, width])
+        .padding(0.3);
+
+    const y = d3.scaleLinear()
+        .domain([
+            Math.min(0, d3.min(data, d => d.change)),
+            d3.max(data, d => d.change) * 1.2
+        ])
+        .range([height, 0]);
+
+    // Color scale
+    const colorScale = d3.scaleOrdinal()
+        .domain(["overall", "sex", "age", "education"])
+        .range(["#4a90e2", "#e94e77", "#f97316", "#22c55e"]);
+
+    // Bars
+    g.selectAll("rect")
+        .data(data)
+        .enter()
+        .append("rect")
+        .attr("x", d => x(d.category))
+        .attr("width", x.bandwidth())
+        .attr("y", d => Math.min(y(d.change), y(0)))
+        .attr("height", d => Math.abs(y(d.change) - y(0)))
+        .attr("fill", d => colorScale(d.group))
+        .attr("rx", 4);
+
+    // Value labels
+    g.selectAll(".value-label")
+        .data(data)
+        .enter()
+        .append("text")
+        .attr("class", "value-label")
+        .attr("x", d => x(d.category) + x.bandwidth() / 2)
+        .attr("y", d => y(d.change) - 5)
+        .attr("text-anchor", "middle")
+        .style("font-size", "12px")
+        .style("font-weight", "600")
+        .text(d => d.change.toFixed(1) + "%");
+
+    // Zero line
+    g.append("line")
+        .attr("x1", 0).attr("x2", width)
+        .attr("y1", y(0)).attr("y2", y(0))
+        .attr("stroke", "#555")
+        .attr("stroke-width", 2);
+
+    // Axes
+    g.append("g")
+        .attr("transform", `translate(0, ${height})`)
+        .call(d3.axisBottom(x))
+        .selectAll("text")
+        .attr("transform", "rotate(-45)")
+        .style("text-anchor", "end")
+        .attr("dx", "-0.8em")
+        .attr("dy", "0.15em");
+
+    g.append("g")
+        .call(d3.axisLeft(y).ticks(5).tickFormat(d => d + "%"));
+
+    // Title
+    svg.append("text")
+        .attr("x", 800 / 2)
+        .attr("y", 30)
+        .attr("text-anchor", "middle")
+        .style("font-size", "20px")
+        .style("font-weight", "700")
+        .text(window.mode === "nominal" 
+            ? "Wealth Growth 2019-2022: Custom Comparison" 
+            : "Real Wealth Growth (Inflation-adjusted): Custom Comparison");
+}
+
+function initCollapsibles() {
+    const collapsibles = document.querySelectorAll(".collapsible");
+    
+    collapsibles.forEach(btn => {
+        btn.addEventListener("click", function() {
+            this.classList.toggle("active");
+            const content = this.nextElementSibling;
+            
+            if (content.style.display === "block") {
+                content.style.display = "none";
+            } else {
+                content.style.display = "block";
+            }
+        });
+    });
+
+    // Add listeners to all checkboxes
+    document.querySelectorAll(".content-block input[type='checkbox']").forEach(checkbox => {
+        checkbox.addEventListener("change", (e) => {
+            const categoryKey = e.target.getAttribute("data-category");
+            selectedCategories[categoryKey] = e.target.checked;
+            renderInteractiveChart();
+        });
+    });
+}
+
+// Initialize everything
 initToggle();
+initCollapsibles();
 
 // Initial load
 renderOverall();
 updateTextVisibility();
 checkScroll();
+renderInteractiveChart();
