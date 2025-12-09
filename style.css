@@ -53,7 +53,7 @@ body {
 
 /* ------------ HEADER ------------ */
 .header {
-    text-align: center;
+    text-align: center; /* KEEP: This centers the H1/H2/Author P tags */
     padding: 60px 30px;
     background: white;
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
@@ -77,11 +77,34 @@ body {
     color: #555;
 }
 
+/* Modify the styling for paragraphs inside the header */
 .header p {
     font-size: 16px;
     color: #666;
     max-width: 800px;
-    margin: 0 auto;
+    margin: 15px auto 0 auto; /* Added 15px margin on top for spacing */
+    text-align: left; /* NEW: This aligns the text to the left */
+}
+
+/* Also add a rule for the list inside the header */
+.header ul {
+    max-width: 800px;
+    margin: 20px auto; /* Centers the list block itself */
+    padding-left: 20px; /* Standard list indentation */
+    text-align: left; /* Ensures list items are left-aligned */
+}
+
+/* And for the list items */
+.header ul li {
+    text-align: left; /* Ensures text in list items is left-aligned */
+    margin-bottom: 10px;
+}
+
+/* And for the new subheading */
+.header h3 {
+    text-align: left; /* NEW: Aligns the subheading left */
+    max-width: 800px;
+    margin: 40px auto 15px auto; /* Centers the block, but left-aligns the text */
 }
 
 /* ------------ SCROLLYTELLING CONTAINER ------------ */
