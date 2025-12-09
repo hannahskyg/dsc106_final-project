@@ -88,7 +88,7 @@ body {
 #scroll-container {
     position: relative;
     display: flex;
-    min-height: 400vh;
+    min-height: 300vh;
     gap: 30px;
     width: 90%;
     margin: auto;
@@ -102,7 +102,7 @@ body {
 
 /* Your friend removed fading — so we keep it clean */
 .step {
-    min-height: 90vh;
+    min-height: 60vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
